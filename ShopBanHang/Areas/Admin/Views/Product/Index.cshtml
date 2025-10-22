@@ -1,0 +1,106 @@
+﻿@model IEnumerable<ShopBanHang.Models.Product>
+
+@{
+    ViewData["Title"] = "Quản lý Sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">@ViewData["Title"]</h1>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách sản phẩm</h6>
+            <a asp-action="Create" asp-controller="Product" class="btn btn-success btn-sm">
+                <i class="fa fa-plus"></i> Thêm sản phẩm mới
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="productTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Hình ảnh</th>
+                            <th>Tên Sản phẩm</th>
+                            <th>Đơn giá</th>
+                            <th>Số lượng tồn</th>
+                            <th>Thương hiệu</th>
+                            <th>Trạng thái</th>
+                            <th style="width: 100px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            var stt = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@(stt++)</td>
+                                    <td>
+                                        <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "/images/placeholder.png" : item.HinhAnh)"
+                                             alt="@item.TenSP" style="width: 70px; height: 70px; object-fit: cover;" />
+                                    </td>
+                                    <td>@item.TenSP</td>
+                                    <td>
+                                        @if (item.DonGia.HasValue)
+                                        {
+                                            <span>@item.DonGia.Value.ToString("N0") đ</span>
+                                        }
+                                    </td>
+                                    <td>@item.so_Luong_Ton</td>
+                                    <td>@item.thuongHieu</td>
+                                    <td>
+                                        @if (item.trangThai)
+                                        {
+                                            <span class="badge badge-success">Kích hoạt</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">Ẩn</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@item.MaSP" class="btn btn-primary btn-sm" title="Sửa">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.MaSP" class="btn btn-danger btn-sm" title="Xóa"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center">Chưa có sản phẩm nào. Hãy nhấn "Thêm sản phẩm mới" để bắt đầu.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,118 @@
+﻿﻿<div class="header-top">
+	<div class="header-bottom">
+		<div class="logo">
+			<h1><a href="~/Home">Lighting</a></h1>
+		</div>
+		<!---->
+		<div class="top-nav">
+			<ul class="memenu skyblue">
+				<li class="active"><a href="/Home">Home</a></li>
+				<li class="grid">
+					<a asp-controller="Product" asp-action="Index"> Products</a>
+					<div class="mepanel">
+						<div class="row">
+							<div class="col1 me-one">
+								<h4>Shop</h4>
+								<ul>
+									<li><a href="/Product">New Arrivals</a></li>
+									<li><a href="/Product">Home</a></li>
+									<li><a href="/Product">Decorates</a></li>
+									<li><a href="/Product">Accessories</a></li>
+									<li><a href="/Product">Kids</a></li>
+									<li><a href="/product">Login</a></li>
+									<li><a href="/product">Brands</a></li>
+									<li><a href="/product">My Shopping Bag</a></li>
+								</ul>
+							</div>
+							<div class="col1 me-one">
+								<h4>Type</h4>
+								<ul>
+									<li><a href="/product">Diwali Lights</a></li>
+									<li><a href="/product">Tube Lights</a></li>
+									<li><a href="/product">Bulbs</a></li>
+									<li><a href="/product">Ceiling Lights</a></li>
+									<li><a href="/product">Accessories</a></li>
+									<li><a href="/product">Lanterns</a></li>
+								</ul>
+							</div>
+							<div class="col1 me-one">
+								<h4>Popular Brands</h4>
+								<ul>
+									<li><a href="/product">Everyday</a></li>
+									<li><a href="/product">Philips</a></li>
+									<li><a href="/product">Havells</a></li>
+									<li><a href="/product">Wipro</a></li>
+									<li><a href="/product">Jaguar</a></li>
+									<li><a href="/product">Ave</a></li>
+									<li><a href="/product">Gold Medal</a></li>
+									<li><a href="/product">Anchor</a></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</li>
+
+				@* <li class="grid"> *@
+				@* 	<a href="~/user/#">Accessories</a> *@
+				@* 	<div class="mepanel"> *@
+				@* 		<div class="row"> *@
+				@* 			<div class="col1 me-one"> *@
+				@* 				<h4>Shop</h4> *@
+				@* 				<ul> *@
+				@* 					<li><a href="/product">New Arrivals</a></li> *@
+				@* 					<li><a href="/product">Home</a></li> *@
+				@* 					<li><a href="/product">Decorates</a></li> *@
+				@* 					<li><a href="/product">Accessories</a></li> *@
+				@* 					<li><a href="/product">Kids</a></li> *@
+				@* 					<li><a href="/product">Login</a></li> *@
+				@* 					<li><a href="/product">Brands</a></li> *@
+				@* 					<li><a href="/product">My Shopping Bag</a></li> *@
+				@* 				</ul> *@
+				@* 			</div> *@
+				@* 			<div class="col1 me-one"> *@
+				@* 				<h4>Type</h4> *@
+				@* 				<ul> *@
+				@* 					<li><a href="/product">Diwali Lights</a></li> *@
+				@* 					<li><a href="/product">Tube Lights</a></li> *@
+				@* 					<li><a href="/product">Bulbs</a></li> *@
+				@* 					<li><a href="/product">Ceiling Lights</a></li> *@
+				@* 					<li><a href="/product">Accessories</a></li> *@
+				@* 					<li><a href="/product">Lanterns</a></li> *@
+				@* 				</ul> *@
+				@* 			</div> *@
+				@* 			<div class="col1 me-one"> *@
+				@* 				<h4>Popular Brands</h4> *@
+				@* 				<ul> *@
+				@* 					<li><a href="/product">Everyday</a></li> *@
+				@* 					<li><a href="/product">Philips</a></li> *@
+				@* 					<li><a href="/product">Havells</a></li> *@
+				@* 					<li><a href="/product">Wipro</a></li> *@
+				@* 					<li><a href="/product">Jaguar</a></li> *@
+				@* 					<li><a href="/product">Ave</a></li> *@
+				@* 					<li><a href="/product">Gold Medal</a></li> *@
+				@* 					<li><a href="/product">Anchor</a></li> *@
+				@* 				</ul> *@
+				@* 			</div> *@
+				@* 		</div> *@
+				@* 	</div> *@
+				@* </li> *@
+				<li class="grid"><a href="/contact">Contact</a></li>
+			</ul>
+		</div>
+		<!---->
+		<div class="cart box_1">
+			<a asp-controller="Cart" asp-action="Index" asp-route-id="201">
+
+				<div class="total">
+					<span class="simpleCart_total"></span> (<span id="simpleCart_quantity" class="simpleCart_quantity"></span>)
+				</div>
+				<span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span>
+			</a>
+			<p><a href="~/user/javascript:;" class="simpleCart_empty">Empty Cart</a></p>
+			<div class="clearfix"> </div>
+		</div>
+		<div class="clearfix"> </div>
+		<!---->
+	</div>
+	<div class="clearfix"> </div>
+</div>

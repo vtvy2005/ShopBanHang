@@ -1,0 +1,91 @@
+﻿@model int
+@{
+    // Tạo một ID duy nhất cho container để bạn có thể dùng component này nhiều lần trên cùng một trang
+    var uniqueId = "product-list-" + Guid.NewGuid().ToString("N");
+    var take = Model; // Nhận số lượng sản phẩm từ class View Component
+}
+
+<div id="@uniqueId" class="items-sec">
+    <div class="col-md-12">
+        <p style="text-align: center; font-size: 1.2em; padding: 50px;">
+            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Đang tải sản phẩm...
+        </p>
+    </div>
+</div>
+
+<script>
+    // Bọc trong một hàm tự gọi (IIFE) để tránh xung đột biến
+    (function() {
+        // Lấy đúng container của component này
+        const container = document.getElementById('@uniqueId');
+
+        // Hàm này sẽ chạy ngay khi script được render
+        async function loadAndRender() {
+            try {
+                const [productsResponse, categoriesResponse] = await Promise.all([
+                    fetch(`/api/products?take=@take`),
+                    fetch('/api/categories')
+                ]);
+
+                if (!productsResponse.ok || !categoriesResponse.ok) {
+                    throw new Error('Không thể tải dữ liệu.');
+                }
+
+                const products = await productsResponse.json();
+                const categories = await categoriesResponse.json();
+
+                if (products.length === 0) {
+                    container.innerHTML = '<p class="col-md-12 text-center">Không có sản phẩm nào.</p>';
+                    return;
+                }
+
+                const categoryMap = new Map(categories.map(cat => [cat.maLoaiSP, cat.tenLoaiSP]));
+
+                let finalHtml = '';
+                products.forEach((product, index) => {
+                    const categoryName = categoryMap.get(product.maLoaiDen) || "Chưa phân loại";
+
+                    let priceHtml = `<p>${formatCurrency(product.donGia)}</p>`;
+                    if (product.donGiaKhuyenMai && product.donGiaKhuyenMai < product.donGia) {
+                        priceHtml = `<p>${formatCurrency(product.donGiaKhuyenMai)}</p>
+                                     <span class="pric1"><del>${formatCurrency(product.donGia)}</del></span>`;
+                    }
+
+                    finalHtml += `
+                        <div class="col-md-3 feature-grid">
+                            <a href="/Product/Single/${product.maSP}">
+                                <img src="${product.hinhAnh}" alt="${product.tenSP}" class="img-responsive"/>
+                                <div class="arrival-info">
+                                    <h4>${product.tenSP}</h4>
+                                    <small style="color: #999;">${categoryName}</small>
+                                    ${priceHtml}
+                                </div>
+                                <div class="viw">
+                                    <a href="/Product/Single/${product.maSP}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>View</a>
+                                </div>
+                            </a>
+                        </div>`;
+
+                    if ((index + 1) % 4 === 0) {
+                        finalHtml += '<div class="clearfix"></div>';
+                    }
+                });
+
+                container.innerHTML = finalHtml;
+
+            } catch (error) {
+                console.error('Lỗi khi tải component sản phẩm:', error);
+                container.innerHTML = `<p class="text-center text-danger">${error.message}</p>`;
+            }
+        }
+
+        // Hàm helper, có thể đặt ở file riêng nếu muốn
+        function formatCurrency(number) {
+            if (typeof number !== 'number') return '';
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number);
+        }
+
+        // Chạy hàm
+        loadAndRender();
+    })();
+</script>

@@ -1,0 +1,128 @@
+﻿@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "_Layout";
+}
+<div class="product">
+    <div class="container">
+        <div class="product-price1">
+            <div id="product-details-container" class="top-sing">
+                <div id="loading-message" class="col-md-12">
+                    <p style="text-align: center; font-size: 1.2em; padding: 100px;">Đang tải chi tiết sản phẩm...</p>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-prdt">
+            @* Phần sản phẩm liên quan *@
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/imagezoom.js"></script>
+    <script defer src="~/js/jquery.flexslider.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const productId = @ViewBag.ProductId;
+            if (productId > 0) {
+                loadProductDetails(productId);
+            } else {
+                document.getElementById('product-details-container').innerHTML = "<p class='text-center text-danger'>Không tìm thấy ID sản phẩm.</p>";
+            }
+        });
+
+        // Hàm addToCart này đã đúng, không cần sửa
+        function addToCart(event) {
+            event.preventDefault();
+
+            const button = event.currentTarget;
+            const productId = parseInt(button.dataset.productId);
+            const quantity = parseInt(document.getElementById('quantity-input').value);
+
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('Vui lòng nhập số lượng hợp lệ.');
+                return;
+            }
+
+            let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.qty += quantity;
+            } else {
+                cart.push({ id: productId, qty: quantity });
+            }
+
+            localStorage.setItem('shoppingCart', JSON.stringify(cart));
+            alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+        }
+
+        function formatCurrency(number) {
+            if (typeof number !== 'number') return '';
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number);
+        }
+
+        async function loadProductDetails(id) {
+            const container = document.getElementById('product-details-container');
+            try {
+                const response = await fetch(`/api/products/${id}`);
+                if (!response.ok) throw new Error('Sản phẩm không tồn tại hoặc có lỗi xảy ra.');
+
+                const product = await response.json();
+
+                // Xóa message loading
+                const loadingMessage = document.getElementById('loading-message');
+                if (loadingMessage) loadingMessage.remove();
+
+                let priceHtml = `<h5 class="item_price">${formatCurrency(product.donGia)}</h5>`;
+                if (product.donGiaKhuyenMai && product.donGiaKhuyenMai < product.donGia) {
+                    priceHtml = `<h5 class="item_price">${formatCurrency(product.donGiaKhuyenMai)}</h5>
+                                 <p>Giá gốc: <del>${formatCurrency(product.donGia)}</del></p>`;
+                }
+
+                // ====================================================================
+                // === SỬA LỖI TẠI ĐÂY: XÓA CÁC CLASS CỦA simpleCart.js ================
+                // ====================================================================
+                const productHtml = `
+                    <div class="col-md-7 single-top">
+                        <div class="flexslider">
+                            <ul class="slides">
+                                <li data-thumb="${product.hinhAnh}">
+                                    <div class="thumb-image"><img src="${product.hinhAnh}" data-imagezoom="true" class="img-responsive" alt="${product.tenSP}" /></div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-5 single-top-in">
+                        <div class="single-para">
+                            <h4>${product.tenSP}</h4>
+                            ${priceHtml}
+                            <p class="para">${product.moTa || 'Sản phẩm này chưa có mô tả.'}</p>
+
+                            <div style="display: flex; align-items: center; margin: 15px 0;">
+                                <label for="quantity-input" style="margin-right: 10px;">Số lượng:</label>
+                                <input type="number" id="quantity-input" class="form-control" value="1" min="1" style="width: 80px;">
+                            </div>
+
+                            <a href="#" data-product-id="${product.maSP}" class="add-cart">ADD TO CART</a>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>`;
+
+                container.innerHTML = productHtml;
+
+                // Gán sự kiện cho nút "ADD TO CART" sau khi nó được tạo ra
+                container.querySelector('.add-cart').addEventListener('click', addToCart);
+
+                // Khởi tạo lại plugin slider
+                $('.flexslider').flexslider({
+                    animation: "slide",
+                    controlNav: "thumbnails"
+                });
+            } catch (error) {
+                console.error('Lỗi khi tải chi tiết sản phẩm:', error);
+                container.innerHTML = `<p class="text-center text-danger">${error.message}</p>`;
+            }
+        }
+    </script>
+}

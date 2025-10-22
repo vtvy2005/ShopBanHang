@@ -1,0 +1,10 @@
+﻿@{
+	ViewData["Title"] = "Danh sách sản phẩm";
+	Layout = "_Layout";
+}
+
+<div class="items">
+    <div class="container">
+        @await Component.InvokeAsync("ProductJsonList", new { take = 0 })
+    </div>
+</div>

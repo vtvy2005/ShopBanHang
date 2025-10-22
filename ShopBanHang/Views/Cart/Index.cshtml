@@ -1,0 +1,157 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    Layout = "_Layout";
+}
+<div class="container">
+    <div class="check-sec">
+        <div class="col-md-3 cart-total">
+            <a class="continue" href="@Url.Action("Index", "Product")">Tiếp tục mua sắm</a>
+            <div id="price-details-container">
+                <h3>Chi tiết giá</h3>
+                <span>Tổng cộng</span>
+                <span class="total1">0 đ</span>
+                <span>Giảm giá</span>
+                <span class="total1">0 đ</span>
+                <span>Phí giao hàng</span>
+                <span class="total1">0 đ</span>
+                <div class="clearfix"></div>
+            </div>
+            <ul class="total_price">
+                <li class="last_price"> <h4>TỔNG CỘNG</h4></li>
+                <li class="last_price"><span id="final-total">0 đ</span></li>
+            </ul>
+            <div class="clearfix"></div><br />
+            <a class="order" href="#">Đặt hàng</a>
+        </div>
+
+        <div class="col-md-9 cart-items">
+            <h1 id="cart-title">Giỏ hàng của tôi (0)</h1>
+            <div id="cart-items-container">
+                <p>Đang tải giỏ hàng...</p>
+            </div>
+        </div>
+
+        <div class="clearfix"> </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCartDetails();
+        });
+
+        function formatCurrency(number) {
+            if (typeof number !== 'number') return '0 đ';
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number);
+        }
+
+        async function loadCartDetails() {
+            const cartItemsContainer = document.getElementById('cart-items-container');
+            const cartTitle = document.getElementById('cart-title');
+
+            // SỬA LỖI TẠI ĐÂY: Đọc từ localStorage thay vì sessionStorage
+            const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+
+            if (cart.length === 0) {
+                cartTitle.innerText = "Giỏ hàng của tôi (0)";
+                cartItemsContainer.innerHTML = '<p>Giỏ hàng của bạn đang trống.</p>';
+                updatePriceDetails(0);
+                return;
+            }
+
+            // Lấy danh sách ID (code này đã đúng vì nó tìm 'item.id')
+            const productIds = cart.map(item => item.id);
+
+            try {
+                const response = await fetch('/api/cart/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productIds)
+                });
+                const productsDetails = await response.json();
+
+                const productDetailsMap = new Map(productsDetails.map(p => [p.maSP, p]));
+
+                let finalHtml = '';
+                let subTotal = 0;
+                let totalItems = 0;
+
+                cart.forEach(cartItem => {
+                    const product = productDetailsMap.get(cartItem.id);
+                    if (!product) return;
+
+                    const price = product.donGiaKhuyenMai ?? product.donGia;
+                    subTotal += price * cartItem.qty;
+                    totalItems += cartItem.qty;
+
+                    finalHtml += `
+                        <div class="cart-header">
+                            <div class="close1" data-product-id="${product.maSP}"></div>
+                            <div class="cart-sec simpleCart_shelfItem">
+                                <div class="cart-item cyc">
+                                    <img src="${product.hinhAnh}" class="img-responsive" alt="${product.tenSP}" />
+                                </div>
+                                <div class="cart-item-info">
+                                    <h3><a href="/Product/Single/${product.maSP}">${product.tenSP}</a></h3>
+                                    <ul class="qty">
+                                        <li><p>Số lượng: ${cartItem.qty}</p></li>
+                                    </ul>
+                                    <div class="delivery">
+                                        <p>Giá: ${formatCurrency(price)}</p>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>`;
+                });
+
+                cartTitle.innerText = `Giỏ hàng của tôi (${totalItems})`;
+                cartItemsContainer.innerHTML = finalHtml;
+                updatePriceDetails(subTotal);
+
+            } catch (error) {
+                console.error('Lỗi khi tải giỏ hàng:', error);
+                cartItemsContainer.innerHTML = '<p class="text-danger">Không thể tải được giỏ hàng. Vui lòng thử lại.</p>';
+            }
+        }
+
+        function updatePriceDetails(subTotal) {
+            const discount = 0;
+            const deliveryCharge = subTotal > 0 ? 30000 : 0;
+            const finalTotal = subTotal - discount + deliveryCharge;
+
+            document.getElementById('price-details-container').innerHTML = `
+                <h3>Chi tiết giá</h3>
+                <span>Tổng cộng</span>
+                <span class="total1">${formatCurrency(subTotal)}</span>
+                <span>Giảm giá</span>
+                <span class="total1">${formatCurrency(discount)}</span>
+                <span>Phí giao hàng</span>
+                <span class="total1">${formatCurrency(deliveryCharge)}</span>
+                <div class="clearfix"></div>`;
+
+            document.getElementById('final-total').innerText = formatCurrency(finalTotal);
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('close1')) {
+                const productId = parseInt(e.target.getAttribute('data-product-id'));
+                if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+                    removeItemFromCart(productId);
+                }
+            }
+        });
+
+        function removeItemFromCart(productId) {
+            // SỬA LỖI TẠI ĐÂY: Đọc và ghi vào localStorage
+            let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('shoppingCart', JSON.stringify(cart));
+            loadCartDetails();
+        }
+    </script>
+}
